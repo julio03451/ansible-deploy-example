@@ -1,4 +1,7 @@
 This is a simplified example of ansible deployment to servers with both Linux and Windows environments.
+
+The whole process looks like this: A commit or merge on github triggers a webhook, which is sent to Jenkins. Jenkins runs the required ansible playbook depending on the environment. The example omits blue/green deployment, prod/stage deployment and so on to simplify the example.
+
 ```
 .
 ├── inventories
