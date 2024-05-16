@@ -39,7 +39,7 @@
 
     - name: Restart service
       service:
-        name: "{{ e_service_name }}-{{ e_service_port }}"
+        name: "{{ e_service_name }}"
         state: restarted
         
     # - name: Add record to DB
