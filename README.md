@@ -1,5 +1,5 @@
 This is a simplified example of ansible deployment to servers with both Linux and Windows environments.
-
+```
 .
 ├── inventories
 │   ├── group_vars
@@ -16,3 +16,4 @@ This is a simplified example of ansible deployment to servers with both Linux an
     └── extra_vars_check
         └── tasks
             └── main.yml
+```
