@@ -1,0 +1,9 @@
+ansible_user: Administrator
+ansible_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+ansible_port: 5986
+ansible_connection: winrm
+ansible_winrm_scheme: https
+ansible_winrm_server_cert_validation: ignore
+

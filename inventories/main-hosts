@@ -1,0 +1,19 @@
+linux-server1 ansible_host=10.0.0.5
+linux-server2 ansible_host=10.0.0.6
+
+windows-server1 ansible_host=192.168.0.5
+windows-server2 ansible_host=192.168.0.6
+
+[linux_servers]
+linux-server1
+linux-server2
+
+[windows_servers]
+windows-server1
+windows-server2
+
+[linux:children]
+linux_servers
+
+[windows:children]
+windows_servers

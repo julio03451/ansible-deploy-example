@@ -1,0 +1,56 @@
+---
+- hosts: localhost
+  gather_facts: false
+  roles:
+    - extra_vars_check
+  vars:
+    extra_vars:
+      - e_host
+      - e_service_name
+      - e_jenkins_job_name
+      - e_jenkins_build_number
+
+  tasks:
+    - name: Record deploy start time
+      shell: "date +%s%N | cut -b1-13"
+      register: deploy_time_start
+      
+ - hosts: '{{ e_host }}'
+  name: Deploy Web Service
+  become: true
+  vars:
+    project_path: "/opt/{{ e_service_name }}"
+  tasks:
+    - name: Check if target dir exists
+      stat:
+        path: "{{ project_path }}"
+      register: directory_status
+      when: directory_status.stat.exists == false
+
+    - name: Create project directory
+      file:
+        dest: "{{ project_path }}"
+        state: directory
+        owner: ansible
+        group: ansible
+        mode: 0755
+
+    - name: Deploy artifact to project directory
+      synchronize:
+        src:  "/opt/jenkins_jobs/{{ e_jenkins_job_name }}/builds/{{ e_jenkins_build_number }}/archive/Build/"
+        dest: "{{ project_path }}"
+        owner: false
+        group: false
+      delegate_to: ua-ansible
+
+    - name: Restart service
+      service:
+        name: "{{ e_service_name }}"
+        state: restarted
+        
+    # - name: Add record to DB
+    #   # Task for record to DB here
+
+    # - name: Check service HTTP response
+    #   # Task for checking service HTTP response here
+

@@ -1,0 +1,68 @@
+---
+- hosts: localhost
+  gather_facts: false
+  roles:
+    - extra_vars_check
+  vars:
+    extra_vars:
+      - e_host
+      - e_service_name
+      - e_jenkins_job_name
+      - e_jenkins_build_number
+
+- hosts: '{{ e_host }}'
+  vars:
+    project_path: "C:\\Utils\\{{ e_service_name }}"
+    jenkins_api_token: "{{ lookup('env', 'JENKINS_API_TOKEN') }}"
+  tasks:
+    - name: Deploy Service
+      block:
+        - name: Check directory existance
+          win_file:
+            dest: "{{ project_path }}"
+            state: directory
+          register: directory_status
+
+        - name: Creating temp folder for artifacts
+          win_tempfile:
+            state: directory
+            suffix: jenkins
+          register: temp_folder
+
+        - name: Download artifacts from Jenkins
+          win_get_url:
+            url: "{{ g_jenkins_host }}/job/{{ jenkins_project_name }}/{{ build_number }}/artifact/*zip*/archive.zip"
+            dest: '{{ temp_folder.path }}'
+            headers:
+              - "Authorization: Bearer {{ jenkins_api_token }}"
+          no_log: True
+
+        - name: Unzip artifact
+          win_unzip:
+            src: "{{ temp_folder.path }}\\Archive.zip"
+            dest: "{{ temp_folder.path }}"
+            delete_archive: yes
+
+        - name: Stop older instance
+          win_service:
+            name: "{{ e_service_name }}"
+            state: stopped
+          ignore_errors: yes
+          when: directory_status.changed == false
+
+        - name: Replace artifacts
+          win_copy:
+            src: "{{ temp_folder.path }}\\archive\\Build\\"
+            dest: "{{ project_path }}"
+            remote_src: true
+            force: yes
+          register: result
+          retries: 3
+          delay: 60
+          until: not result.failed
+
+        - name: Start instance
+          win_service:
+            name: "{{ e_service_name }}"
+            state: started
+

@@ -1,0 +1,8 @@
+- name: "Verify that required variables are defined"
+  assert:
+    that: "{{ item }} is defined"
+    fail_msg: "{{ item }} must be defined!"
+    success_msg: "Extra variable {{ item }} is defined."
+    quiet: yes
+  with_items: "{{ extra_vars }}"
+
